@@ -92,7 +92,7 @@ export default function Home() {
         .hero::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(rgba(99,102,241,0.07) 1px, transparent 1px); background-size: 28px 28px; animation: gridMove 8s linear infinite; pointer-events: none; mask-image: linear-gradient(180deg, rgba(0,0,0,0.5), transparent 80%); -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.5), transparent 80%); }
         .hero-inner { position: relative; z-index: 1; }
         .hero-inner { max-width: 760px; }
-        .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue-600); padding: 5px 12px 5px 8px; background: var(--blue-soft); border: 1px solid rgba(37,99,235,0.2); border-radius: 100px; margin-bottom: 20px; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-600); padding: 5px 12px 5px 8px; background: var(--blue-soft); border: 1px solid rgba(37,99,235,0.2); border-radius: 100px; margin-bottom: 20px; max-width: 100%; white-space: normal; text-align: left; }
         .eyebrow-tick { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--blue-600); color: #fff; font-size: 9px; }
         .hero-title { font-family: var(--serif); font-size: clamp(32px, 3.2vw, 44px); line-height: 1.08; color: var(--text-100); letter-spacing: -0.02em; font-weight: 400; text-wrap: balance; }
         .hero-title em { font-style: italic; color: var(--blue-600); }
@@ -190,7 +190,7 @@ export default function Home() {
         .nav-link.active { color: var(--text-100); background: var(--blue-soft); }
 
         @media (max-width: 1080px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
-        @media (max-width: 720px) { .nav-links { display: none; } .hero { padding: 44px 0 40px; } .about-inner { grid-template-columns: 1fr; gap: 28px; } .about-left { position: static; } .footer-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 720px) { .nav-links { display: none; } .hero { padding: 40px 0 36px; } .hero-title { font-size: 28px; } .about-inner { grid-template-columns: 1fr; gap: 28px; } .about-left { position: static; } .footer-grid { grid-template-columns: 1fr; } }
       `}</style>
 
       {/* Top bar */}
