@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync-sortd": "xcopy /Y /E \"..\\sortd\\*\" \"public\\sortd-app\\\""
+    "sync-sortd": "xcopy /Y /E \"C:\\Code\\Project Team Sort\\CLaude\\*.js\" \"public\\sortd-app\\\" & xcopy /Y \"C:\\Code\\Project Team Sort\\CLaude\\*.html\" \"public\\sortd-app\\\" & xcopy /Y \"C:\\Code\\Project Team Sort\\CLaude\\*.css\" \"public\\sortd-app\\\""
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
