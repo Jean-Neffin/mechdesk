@@ -68,6 +68,7 @@ export default function Home() {
 
         /* TOP BAR */
         .top-bar { background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-400); }
+        @media (max-width: 720px) { .top-bar-inner { flex-direction: column; height: auto; padding: 8px 0; gap: 4px; font-size: 11px; } .top-bar-right { display: none; } }
         .top-bar-inner { display: flex; align-items: center; justify-content: space-between; height: 36px; }
         .top-bar-inner strong { color: var(--text-200); font-weight: 500; }
         .top-bar-right { display: flex; align-items: center; gap: 20px; }
@@ -196,7 +197,7 @@ export default function Home() {
       {/* Top bar */}
       <div className="top-bar">
         <div className="md-container top-bar-inner">
-          <span><strong>Department of Mechanical Engineering</strong> · Rajagiri School of Engineering &amp; Technology, Kochi</span>
+          <span className="top-bar-text"><strong>Dept. of Mechanical Engineering</strong> · RSET, Kochi</span>
           <div className="top-bar-right">
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
               <span className="status-dot" /> All systems operational
