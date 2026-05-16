@@ -199,10 +199,6 @@ export default function Home() {
         <div className="md-container top-bar-inner">
           <span className="top-bar-text"><strong>Dept. of Mechanical Engineering</strong> · RSET, Kochi</span>
           <div className="top-bar-right">
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <span className="status-dot" /> All systems operational
-            </span>
-            <span className="top-bar-divider" />
             <span style={{ fontFamily: "var(--mono)", fontSize: 11 }}>v2.0</span>
           </div>
         </div>
