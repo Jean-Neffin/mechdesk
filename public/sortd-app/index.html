@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sortd — Balanced project groups</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
+  <!-- SheetJS (for CSV + file reading) -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <!-- ExcelJS (for styled Excel export) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== NAVBAR ===== -->
+  <header id="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo" aria-hidden="true"></span>
+      <span class="nav-title">Sortd</span>
+    </div>
+    <div class="nav-step-label" id="nav-step-label">Step 1 of 5 — Upload</div>
+    <div class="nav-controls">
+      <button id="btn-api-key" class="btn btn-ghost btn-icon" title="Set Gemini API Key">⚙️</button>
+      <button onclick="showShortcutCheatsheet()" class="btn btn-ghost btn-icon" title="Keyboard shortcuts (?)">⌨️</button>
+      <button id="theme-toggle" aria-label="Toggle dark mode">
+        <span>☀️</span><span>🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== PROGRESS BAR ===== -->
+  <nav id="progress-bar" aria-label="Steps">
+    <div style="max-width:1200px;margin:0 auto;">
+      <ol class="progress-steps">
+        <li class="step-node is-active" data-step="1">
+          <div class="step-circle"><span>1</span></div>
+          <span class="step-label">Upload</span>
+        </li>
+        <li class="step-connector" aria-hidden="true"></li>
+        <li class="step-node" data-step="2">
+          <div class="step-circle"><span>2</span></div>
+          <span class="step-label">Preview</span>
+        </li>
+        <li class="step-connector" aria-hidden="true"></li>
+        <li class="step-node" data-step="3" data-variant="locked">
+          <div class="step-circle"><span>3</span></div>
+          <span class="step-label">Pre-formed</span>
+        </li>
+        <li class="step-connector" aria-hidden="true"></li>
+        <li class="step-node" data-step="4">
+          <div class="step-circle"><span>4</span></div>
+          <span class="step-label">Configure</span>
+        </li>
+        <li class="step-connector" aria-hidden="true"></li>
+        <li class="step-node" data-step="5">
+          <div class="step-circle"><span>5</span></div>
+          <span class="step-label">Groups</span>
+        </li>
+      </ol>
+    </div>
+  </nav>
+
+  <!-- ===== STEP CONTENT ===== -->
+  <main class="content-area">
+
+    <!-- ---- STEP 1: UPLOAD ---- -->
+    <div id="step-1" class="step-container" data-step="1">
+      <div class="step-header">
+        <h1 class="step-title">Upload Student Data</h1>
+        <p class="step-subtitle">Upload a .csv or .xlsx file containing your student list.</p>
+      </div>
+
+      <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Upload file">
+        <div class="drop-icon">📂</div>
+        <div class="drop-title">Drag &amp; drop your file here</div>
+        <p class="drop-sub">or</p>
+        <button class="btn btn-outlined" id="btn-browse" type="button">Browse Files</button>
+        <p class="drop-formats">Accepted formats: .csv, .xlsx</p>
+      </div>
+      <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display:none" />
+
+      <div id="file-badge-wrap" class="hidden" style="margin-top:16px;">
+        <span id="file-badge" class="file-badge">📄 <span id="file-name"></span> &nbsp;✅</span>
+      </div>
+
+      <div class="step-nav">
+        <div></div>
+        <button id="btn-next-1" class="btn btn-primary btn-lg" disabled>Next Step →</button>
+      </div>
+    </div>
+
+    <!-- ---- STEP 2: PREVIEW & VALIDATE ---- -->
+    <div id="step-2" class="step-container" data-step="2" hidden>
+      <div class="step-header flex-between">
+        <div>
+          <h1 class="step-title">Preview &amp; Validate</h1>
+          <p class="step-subtitle">Map your columns and review AI-flagged anomalies.</p>
+        </div>
+        <span id="student-count-badge" class="badge badge-primary">0 students</span>
+      </div>
+
+      <!-- AI Banner -->
+      <div id="ai-validation-banner" class="banner-skeleton skeleton mb-16"></div>
+
+      <!-- Column Mapping -->
+      <div class="column-mapping mb-24" id="column-mapping-row">
+        <div class="mapping-field">
+          <label class="mapping-label">Name <span class="ai-chip hidden" id="ai-chip-name">✨ AI mapped</span></label>
+          <select class="input" id="map-name"><option value="">— select column —</option></select>
+        </div>
+        <div class="mapping-field">
+          <label class="mapping-label">CGPA <span class="ai-chip hidden" id="ai-chip-cgpa">✨ AI mapped</span></label>
+          <select class="input" id="map-cgpa"><option value="">— select column —</option></select>
+        </div>
+        <div class="mapping-field">
+          <label class="mapping-label">UID <span class="ai-chip hidden" id="ai-chip-uid">✨ AI mapped</span></label>
+          <select class="input" id="map-uid"><option value="">— select column —</option></select>
+        </div>
+        <div class="mapping-field">
+          <label class="mapping-label">REG No. <span class="ai-chip hidden" id="ai-chip-regNo">✨ AI mapped</span></label>
+          <select class="input" id="map-regNo"><option value="">— select column —</option></select>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="table-stats">
+        <span class="text-muted" style="font-size:13px;" id="table-range-label">Showing all students</span>
+      </div>
+      <div class="table-wrap table-scroll mb-16">
+        <table id="preview-table">
+          <thead>
+            <tr>
+              <th style="width:40px;">#</th>
+              <th id="th-name" title="Sort by name">Name</th>
+              <th id="th-cgpa" title="Sort by CGPA">CGPA</th>
+              <th id="th-uid" title="Sort by UID">UID</th>
+              <th id="th-regno" title="Sort by REG No.">REG No.</th>
+            </tr>
+          </thead>
+          <tbody id="preview-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" id="btn-back-2">← Back</button>
+        <button class="btn btn-primary btn-lg" id="btn-next-2">Next Step →</button>
+      </div>
+    </div>
+
+    <!-- ---- STEP 3: PRE-FORMED TEAMS ---- -->
+    <div id="step-3" class="step-container" data-step="3" hidden>
+      <div class="step-header flex-between" style="align-items:flex-start;">
+        <div>
+          <h1 class="step-title">Pre-formed Teams</h1>
+          <p class="step-subtitle">Mark students who are already working together. Their group will be kept intact.</p>
+        </div>
+        <button class="btn btn-ghost" id="btn-skip-3">Skip →</button>
+      </div>
+
+      <!-- Definition Panel -->
+      <div class="card definition-panel">
+
+        <!-- Method 1: Checkboxes -->
+        <div class="method-section">
+          <div class="method-title">Method 1 — Select from table</div>
+          <div class="checkbox-table-wrap">
+            <div class="checkbox-table-search">
+              <input type="text" class="input" id="m1-search" placeholder="🔍 Search by name or UID..." />
+            </div>
+            <div class="table-scroll" style="max-height:300px;border-bottom:1px solid var(--color-border);">
+              <table id="m1-table" style="width:100%;border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th style="width:36px;"></th>
+                    <th>Name</th>
+                    <th>CGPA</th>
+                    <th>UID</th>
+                  </tr>
+                </thead>
+                <tbody id="m1-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+            <span class="badge badge-soft" id="m1-count">0 selected</span>
+            <button class="btn btn-locked-outlined" id="btn-lock-m1">🔒 Lock Selected as Team</button>
+            <span class="inline-error hidden" id="m1-error"></span>
+          </div>
+        </div>
+
+        <div class="method-divider">or</div>
+
+        <!-- Method 2: Search & Add -->
+        <div class="method-section">
+          <div class="method-title">Method 2 — Search by name or UID</div>
+          <div class="search-add-row">
+            <div class="input-with-icon" style="flex:1;position:relative;">
+              <input type="text" class="input" id="m2-search" placeholder="Search student..." autocomplete="off" />
+              <div id="m2-autocomplete" style="position:absolute;top:100%;left:0;right:0;background:var(--color-bg-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);z-index:50;max-height:200px;overflow-y:auto;display:none;"></div>
+            </div>
+          </div>
+          <div class="pill-list" id="m2-pills"></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button class="btn btn-locked-outlined" id="btn-lock-m2">🔒 Lock as Team</button>
+            <span class="inline-error hidden" id="m2-error"></span>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- Locked Teams List -->
+      <div id="locked-teams-section" class="hidden">
+        <div class="locked-teams-header">
+          Locked Teams <span class="badge badge-locked" id="locked-teams-count">0</span>
+        </div>
+        <div id="locked-teams-list"></div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" id="btn-back-3">← Back</button>
+        <button class="btn btn-primary btn-lg" id="btn-next-3">Next Step →</button>
+      </div>
+    </div>
+
+    <!-- ---- STEP 4: CONFIGURE ---- -->
+    <div id="step-4" class="step-container" data-step="4" hidden>
+      <div class="step-header">
+        <h1 class="step-title">Configure Groups</h1>
+        <p class="step-subtitle">Set your group size and review the grouping plan.</p>
+      </div>
+
+      <div class="configure-center">
+        <div class="card card-elevated config-card">
+
+          <div class="config-row">
+            <span class="config-row-label">Students loaded</span>
+            <span class="config-row-value" id="cfg-student-count">—</span>
+          </div>
+
+          <div class="config-row" id="cfg-locked-row" style="display:none;">
+            <span class="config-row-label">Pre-formed teams 🔒</span>
+            <span class="config-row-value">
+              <span class="badge badge-locked" id="cfg-locked-count">0</span>
+            </span>
+          </div>
+
+          <div class="config-row">
+            <span class="config-row-label">Members per group</span>
+            <div class="group-size-control">
+              <button class="spinner-btn" id="btn-size-dec">−</button>
+              <input type="number" class="input input-mono" id="input-group-size" value="4" min="3" max="10" />
+              <button class="spinner-btn" id="btn-size-inc">+</button>
+            </div>
+          </div>
+
+          <div class="preview-box">
+            <div class="preview-box-title">📊 Grouping Preview</div>
+            <div id="preview-rows"></div>
+          </div>
+
+          <button class="btn btn-primary btn-lg btn-full" id="btn-generate">Generate Groups →</button>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" id="btn-back-4">← Back</button>
+        <div></div>
+      </div>
+    </div>
+
+    <!-- ---- STEP 5: GROUPS & DOWNLOAD ---- -->
+    <div id="step-5" class="step-container" data-step="5" hidden>
+      <div class="step-header flex-between" style="align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 class="step-title">Review &amp; Download Groups</h1>
+          <div class="groups-stats-row" id="groups-stats-row"></div>
+        </div>
+        <button class="btn btn-ghost" id="btn-back-5">← Reconfigure</button>
+      </div>
+
+      <!-- AI Feedback Banner -->
+      <div id="ai-feedback-banner" class="banner-skeleton skeleton mb-16"></div>
+
+      <!-- Groups Grid -->
+      <div id="groups-grid" class="groups-grid"></div>
+    </div>
+
+  </main>
+
+  <!-- ===== DOWNLOAD BAR ===== -->
+  <div id="download-bar">
+    <div class="download-actions">
+      <button class="btn btn-outlined" id="btn-csv">↓ CSV</button>
+      <button class="btn btn-outlined" id="btn-excel">↓ Excel</button>
+      <button class="btn btn-outlined" id="btn-pdf">↓ PDF</button>
+    </div>
+    <div class="session-actions">
+      <button class="btn btn-ghost" id="btn-save-session">💾 Save Session</button>
+      <label class="btn btn-ghost" style="cursor:pointer;">
+        📂 Load Session
+        <input type="file" id="load-session-input" accept=".json" style="display:none;" />
+      </label>
+    </div>
+  </div>
+
+  <!-- ===== API KEY MODAL ===== -->
+  <div id="api-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-title">Gemini API Key</div>
+      <p class="modal-sub">
+        Enter your Google Gemini API key to enable AI features (column mapping, anomaly detection, pre-formed team parsing, and group quality feedback).<br><br>
+        Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--color-primary);">aistudio.google.com</a>.
+        Your key is stored only in memory and cleared on refresh.
+      </p>
+      <input type="password" class="input" id="api-key-input" placeholder="Paste your API key here..." />
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btn-api-cancel">Cancel</button>
+        <button class="btn btn-primary" id="btn-api-save">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script src="ai.js"></script>
+<script src="exports.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

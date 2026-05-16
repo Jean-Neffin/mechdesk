@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/sortd-app/(.*)", "destination": "/sortd-app/$1" }
+  ]
+}
